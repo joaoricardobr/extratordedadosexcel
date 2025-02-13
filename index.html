@@ -115,7 +115,7 @@
   <div class="container">
     <header>
       <h1>Upload de Planilha</h1>
-      <input type="file" id="fileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;" />
+      <input type="file" id="fileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .json, .txt, .pdf, .docx, .pptx, .odt" style="display: none;" />
       <button class="btn-upload" onclick="document.getElementById('fileInput').click();"><i class="icon-upload">📁</i> Faça Upload de sua Planilha</button>
     </header>
 
@@ -135,11 +135,14 @@
         <button class="btn-save" data-format="pdf" onclick="saveFile('pdf')"><i class="icon-pdf">📄</i> Salvar como PDF</button>
         <button class="btn-save" data-format="txt" onclick="saveFile('txt')"><i class="icon-txt">📝</i> Salvar como TXT</button>
         <button class="btn-save" data-format="html" onclick="saveFile('html')"><i class="icon-html"><></i> Salvar como HTML</button>
+        <button class="btn-save" data-format="docx" onclick="saveFile('docx')"><i class="icon-docx">📄</i> Salvar como DOCX</button>
+        <button class="btn-save" data-format="pptx" onclick="saveFile('pptx')"><i class="icon-pptx">📊</i> Salvar como PPTX</button>
+        <button class="btn-save" data-format="odt" onclick="saveFile('odt')"><i class="icon-odt">📄</i> Salvar como ODT</button>
       </div>
     </main>
 
     <footer>
-      <p>Desenvolvido por <a href="https://joaoricardobr.github.io/meuportifolio" target="_blank">João Ricardo</a></p>
+      <p>Desenvolvido por [Seu Nome ou Empresa]</p>
       <p>Ícones fornecidos por <a href="https://www.flaticon.com" target="_blank">Flaticon</a></p>
       <p>Tecnologias usadas: HTML5, CSS3, JavaScript</p>
     </footer>
@@ -148,6 +151,8 @@
   <!-- Bibliotecas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.30.0/build/docxtemplater.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.10.0/dist/pptxgen.bundle.js"></script>
   <script>
     let data = []; // Dados carregados da planilha
 
@@ -160,16 +165,48 @@
       reader.onload = function (e) {
         const arrayBuffer = e.target.result;
         try {
-          const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-          const sheetName = workbook.SheetNames[0]; // Primeira planilha
-          data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]); // Converte para JSON
+          if (file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            // Lê arquivos CSV, XLSX e XLS
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            const sheetName = workbook.SheetNames[0]; // Primeira planilha
+            data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]); // Converte para JSON
+          } else if (file.name.endsWith('.json')) {
+            // Lê arquivos JSON
+            data = JSON.parse(e.target.result);
+          } else if (file.name.endsWith('.txt')) {
+            // Lê arquivos TXT
+            const lines = e.target.result.split('\n');
+            data = lines.map(line => line.split(','));
+          } else if (file.name.endsWith('.docx')) {
+            // Lê arquivos DOCX (usando docxtemplater)
+            const docxTemplate = new Docxtemplater();
+            docxTemplate.load(arrayBuffer);
+            data = docxTemplate.getFullText(); // Extrai texto do DOCX
+          } else if (file.name.endsWith('.pptx')) {
+            // Lê arquivos PPTX (ainda não há suporte direto no navegador)
+            alert('Leitura de PPTX ainda não implementada.');
+            return;
+          } else if (file.name.endsWith('.odt')) {
+            // Lê arquivos ODT (ainda não há suporte direto no navegador)
+            alert('Leitura de ODT ainda não implementada.');
+            return;
+          } else {
+            alert('Formato de arquivo não suportado.');
+            return;
+          }
+
           renderTable(data);
-          alert('Planilha carregada com sucesso!');
+          alert('Arquivo carregado com sucesso!');
         } catch (error) {
-          alert('Erro ao carregar a planilha. Certifique-se de que o formato é válido.');
+          alert('Erro ao carregar o arquivo. Certifique-se de que o formato é válido.');
         }
       };
-      reader.readAsArrayBuffer(file);
+
+      if (file.name.endsWith('.json') || file.name.endsWith('.txt')) {
+        reader.readAsText(file); // Lê arquivos JSON e TXT como texto
+      } else {
+        reader.readAsArrayBuffer(file); // Lê outros formatos como ArrayBuffer
+      }
     });
 
     // Função para renderizar tabela
@@ -307,6 +344,26 @@
           `;
           blob = new Blob([htmlContent], { type: 'text/html' });
           break;
+        case 'docx':
+          const docxTemplate = new Docxtemplater();
+          const docxBlob = new Blob([docxTemplate.render({ data: selectedRows })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+          const docxLink = document.createElement('a');
+          docxLink.href = URL.createObjectURL(docxBlob);
+          docxLink.download = fileName;
+          docxLink.click();
+          return;
+        case 'pptx':
+          const pptx = new PptxGenJS();
+          const slide = pptx.addSlide();
+          slide.addText('Dados Exportados', { x: 1, y: 1, fontSize: 18 });
+          selectedRows.forEach((row, index) => {
+            slide.addText(JSON.stringify(row), { x: 1, y: 2 + index, fontSize: 12 });
+          });
+          pptx.writeFile({ fileName: fileName });
+          return;
+        case 'odt':
+          alert('Exportação de ODT ainda não implementada.');
+          return;
         default:
           alert(`Formato ${format} ainda não implementado.`);
           return;
