@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Planilha</title>
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        #fileInput {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #processButton {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #processButton:hover {
+            background-color: #0056b3;
+        }
+
+        #dataDisplay {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td, th {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        .export-buttons {
+            margin-top: 20px;
+        }
+
+        .export-buttons button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .export-buttons button:hover {
+            background-color: #218838;
+        }
+
+        .selection-buttons {
+            margin-top: 10px;
+        }
+
+        .selection-buttons button {
+            margin: 5px;
+            padding: 8px 12px;
+            background-color: #ffc107;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .selection-buttons button:hover {
+            background-color: #e0a800;
+        }
+    </style>
+    <!-- Bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Faça Upload de sua Planilha</h1>
+        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" />
+        <button id="processButton">Processar</button>
+
+        <div class="selection-buttons" id="selectionButtons" style="display: none;">
+            <button id="selectAll">Selecionar Todos</button>
+            <button id="deselectAll">Desmarcar Todos</button>
+        </div>
+
+        <div id="dataDisplay"></div>
+
+        <div class="export-buttons" id="exportButtons" style="display: none;">
+            <button id="exportJson">Salvar como JSON</button>
+            <button id="exportCsv">Salvar como CSV</button>
+            <button id="exportExcel">Salvar como Excel</button>
+            <button id="exportPdf">Salvar como PDF</button>
+            <button id="exportTxt">Salvar como TXT</button>
+            <button id="exportHtml">Salvar como HTML</button>
+        </div>
+    </div>
+
+    <script>
+        let jsonData = []; // Armazena os dados processados
+
+        // Processar o arquivo
+        document.getElementById('processButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Por favor, selecione um arquivo.');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Obter a primeira planilha
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                // Converter para JSON
+                jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                // Exibir os dados na página com checkboxes
+                displayDataWithCheckboxes(jsonData);
+
+                // Mostrar os botões de exportação e seleção
+                document.getElementById('exportButtons').style.display = 'block';
+                document.getElementById('selectionButtons').style.display = 'block';
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Exibir os dados na tabela com checkboxes
+        function displayDataWithCheckboxes(data) {
+            const dataDisplay = document.getElementById('dataDisplay');
+            dataDisplay.innerHTML = ''; // Limpar conteúdo anterior
+
+            if (data.length === 0) {
+                dataDisplay.innerHTML = '<p>Nenhum dado encontrado.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+
+            data.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+
+                row.forEach((cell, cellIndex) => {
+                    const td = document.createElement('td');
+                    td.style.border = '1px solid #ccc';
+                    td.style.padding = '8px';
+
+                    if (rowIndex === 0) {
+                        // Cabeçalho da tabela com checkbox para selecionar/desmarcar coluna
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.checked = true; // Todas as colunas são selecionadas por padrão
+                        checkbox.style.marginRight = '5px';
+                        checkbox.addEventListener('change', () => toggleColumnSelection(cellIndex, checkbox.checked));
+
+                        td.textContent = cell;
+                        td.style.textAlign = 'center';
+                        td.style.backgroundColor = '#f9f9f9';
+                        td.insertBefore(checkbox, td.firstChild);
+                    } else {
+                        // Checkbox para seleção de células
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.checked = true; // Todos os dados são selecionados por padrão
+                        checkbox.style.marginRight = '5px';
+
+                        const span = document.createElement('span');
+                        span.textContent = cell;
+
+                        td.appendChild(checkbox);
+                        td.appendChild(span);
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                table.appendChild(tr);
+            });
+
+            dataDisplay.appendChild(table);
+        }
+
+        // Função para alternar a seleção de uma coluna inteira
+        function toggleColumnSelection(columnIndex, isChecked) {
+            const rows = document.querySelectorAll('#dataDisplay table tr');
+            rows.forEach((row, rowIndex) => {
+                if (rowIndex > 0) {
+                    const cell = row.cells[columnIndex];
+                    const checkbox = cell.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = isChecked;
+                }
+            });
+        }
+
+        // Selecionar todos os checkboxes
+        document.getElementById('selectAll').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('#dataDisplay input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        });
+
+        // Desmarcar todos os checkboxes
+        document.getElementById('deselectAll').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('#dataDisplay input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+        });
+
+        // Salvar como JSON
+        document.getElementById('exportJson').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            const jsonContent = JSON.stringify(selectedData, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            downloadFile(blob, 'dados_selecionados.json');
+        });
+
+        // Salvar como CSV
+        document.getElementById('exportCsv').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            const csvContent = XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(selectedData));
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            downloadFile(blob, 'dados_selecionados.csv');
+        });
+
+        // Salvar como Excel
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            const worksheet = XLSX.utils.aoa_to_sheet(selectedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
+            const excelBlob = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBlob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            downloadFile(blob, 'dados_selecionados.xlsx');
+        });
+
+        // Salvar como PDF
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            const doc = new jspdf.jsPDF();
+
+            selectedData.forEach((row, rowIndex) => {
+                row.forEach((cell, cellIndex) => {
+                    doc.text(cell, 10 + cellIndex * 50, 10 + rowIndex * 10); // Ajuste as coordenadas conforme necessário
+                });
+            });
+
+            doc.save('dados_selecionados.pdf');
+        });
+
+        // Salvar como TXT
+        document.getElementById('exportTxt').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            const txtContent = selectedData.map(row => row.join('\t')).join('\n'); // Separar colunas por tabulação
+            const blob = new Blob([txtContent], { type: 'text/plain' });
+            downloadFile(blob, 'dados_selecionados.txt');
+        });
+
+        // Salvar como HTML
+        document.getElementById('exportHtml').addEventListener('click', () => {
+            const selectedData = getSelectedData();
+            let htmlContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Dados Exportados</title></head><body><table border="1">';
+            
+            selectedData.forEach(row => {
+                htmlContent += '<tr>';
+                row.forEach(cell => {
+                    htmlContent += `<td>${cell}</td>`;
+                });
+                htmlContent += '</tr>';
+            });
+
+            htmlContent += '</table></body></html>';
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            downloadFile(blob, 'dados_selecionados.html');
+        });
+
+        // Função para obter os dados selecionados
+        function getSelectedData() {
+            const table = document.querySelector('#dataDisplay table');
+            const rows = Array.from(table.rows);
+            const selectedData = [];
+
+            rows.forEach((row, rowIndex) => {
+                const rowData = [];
+                const cells = Array.from(row.cells);
+
+                cells.forEach((cell, cellIndex) => {
+                    if (rowIndex === 0 || cell.querySelector('input')?.checked) {
+                        rowData.push(cell.textContent.trim());
+                    }
+                });
+
+                if (rowData.length > 0) {
+                    selectedData.push(rowData);
+                }
+            });
+
+            return selectedData;
+        }
+
+        // Função para baixar o arquivo
+        function downloadFile(blob, fileName) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    </script>
+</body>
+</html>
