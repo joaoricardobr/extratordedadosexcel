@@ -1,21 +1,39 @@
 
-
-# Upload e Processamento de Planilhas
+# Upload de Planilha
 
 ![GitHub](https://img.shields.io/badge/Status-Active-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
 
-Este é um aplicativo web simples que permite carregar planilhas (CSV, XLS, XLSX), processar os dados e exportá-los em vários formatos, como JSON, CSV, Excel, PDF, TXT e HTML. O aplicativo também oferece funcionalidades de seleção de linhas e colunas para facilitar o trabalho com grandes conjuntos de dados.
+Este é um aplicativo web desenvolvido por **João Ricardo**, engenheiro da computação, que permite carregar planilhas em diversos formatos (CSV, XLS, XLSX, JSON, TXT, DOCX, PPTX, ODT), processar os dados e exportá-los em múltiplos formatos. O aplicativo oferece uma interface interativa com funcionalidades como seleção de linhas/colunas, processamento de dados e exportação para diferentes formatos.
 
 ## Funcionalidades Principais
 
-- **Upload de Planilha**: Faça upload de arquivos `.csv`, `.xls` ou `.xlsx`.
-- **Processamento de Dados**: Processa os dados carregados para análise.
+- **Upload de Arquivos**:
+  - Faça upload de arquivos nos seguintes formatos:
+    - CSV
+    - XLS / XLSX (Excel)
+    - JSON
+    - TXT
+    - DOCX (Documentos do Word)
+    - PPTX (Apresentações do PowerPoint)
+    - ODT (OpenDocument Text)
+- **Processamento de Dados**:
+  - Processa os dados carregados para análise.
 - **Seleção de Linhas e Colunas**:
-  - Marque/desmarque todas as linhas usando o botão "Selecionar Todos".
+  - Marque/desmarque todas as linhas usando os botões "Selecionar Todos" e "Desmarcar Todos".
   - Oculte/mostre colunas específicas usando os checkboxes no cabeçalho.
 - **Exportação em Múltiplos Formatos**:
-  - Salve os dados processados como JSON, CSV, Excel, PDF, TXT ou HTML.
-- **Interface Responsiva**: Design elegante e responsivo para dispositivos móveis e desktops.
+  - Salve os dados processados nos seguintes formatos:
+    - JSON
+    - CSV
+    - Excel
+    - PDF
+    - TXT
+    - HTML
+    - DOCX
+    - PPTX
+    - ODT
+- **Interface Responsiva**:
+  - Design elegante e responsivo para dispositivos móveis e desktops.
 
 ## Capturas de Tela
 
@@ -31,23 +49,21 @@ Este é um aplicativo web simples que permite carregar planilhas (CSV, XLS, XLSX
 
 ### Passo a Passo
 
-1. **Clone o Repositório**:
-   ```bash
-   git clone https://github.com/seu-usuario/nome-do-repositorio.git
-   cd nome-do-repositorio
-   ```
+1. **Acesse o Projeto**:
+   - Visite o link: [Dados da Planilha](https://joaoricardobr.github.io/extratordedadosexcel/).
 
-2. **Abra o Projeto**:
-   - Abra o arquivo `index.html` no navegador de sua preferência.
+2. **Carregue uma Planilha**:
+   - Clique no botão "Faça Upload de sua Planilha" e selecione um arquivo nos formatos suportados (CSV, XLS, XLSX, JSON, TXT, DOCX, PPTX, ODT).
 
-3. **Carregue uma Planilha**:
-   - Clique no botão "Faça Upload de sua Planilha" e selecione um arquivo `.csv`, `.xls` ou `.xlsx`.
+3. **Selecione Linhas e Colunas**:
+   - Use os botões "Selecionar Todos" ou "Desmarcar Todos" para marcar/desmarcar linhas.
+   - Use os checkboxes no cabeçalho para ocultar/mostrar colunas específicas.
 
-4. **Selecione Linhas e Colunas**:
-   - Use os checkboxes na tabela para selecionar/desmarcar linhas ou ocultar/mostrar colunas.
+4. **Processar Dados**:
+   - Clique no botão "Processar" para processar os dados selecionados.
 
 5. **Exporte os Dados**:
-   - Clique em um dos botões de exportação (JSON, CSV, Excel, PDF, TXT, HTML) para salvar os dados processados.
+   - Escolha o formato de exportação desejado (JSON, CSV, Excel, PDF, TXT, HTML, DOCX, PPTX, ODT) e salve o arquivo gerado.
 
 ### Exemplo de Uso
 
@@ -62,32 +78,24 @@ Este é um aplicativo web simples que permite carregar planilhas (CSV, XLS, XLSX
 - **JavaScript**: Lógica de processamento e interatividade.
 - **SheetJS (xlsx)**: Manipulação de planilhas Excel.
 - **jsPDF**: Geração de arquivos PDF.
+- **docxtemplater**: Geração de arquivos DOCX.
+- **PptxGenJS**: Geração de apresentações PPTX.
 
 ## Licença
 
 Este projeto está licenciado sob a [Licença MIT](LICENSE). Isso significa que você pode usá-lo, modificá-lo e distribuí-lo livremente.
 
-## Contribuições
-
-Contribuições são bem-vindas! Se você encontrar bugs ou quiser adicionar novas funcionalidades, sinta-se à vontade para abrir uma issue ou enviar um pull request.
-
-### Como Contribuir
-
-1. Fork este repositório.
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`).
-3. Faça commit das suas alterações (`git commit -m 'Adiciona nova funcionalidade'`).
-4. Envie para a branch (`git push origin feature/nova-funcionalidade`).
-5. Abra um Pull Request.
-
 ## Autor
 
-2025 João Ricardo. Todos os direitos reservados
-Desenvolvido por **[Joao Ricardo]**.  
-Ícones fornecidos por [Flaticon](https://www.flaticon.com).
-Design inspirado em temas modernos. Feito com ❤️ por <a href="https://github.com/joaoricardobr" target="_blank">João Ricardo</a>.</p>
+Desenvolvido por **João Ricardo**, engenheiro da computação.  
+- Instagram: [@joaoricardo.pe](https://www.instagram.com/joaoricardo.pe)  
+- GitHub: [joaoricardobr](https://github.com/joaoricardobr)  
+- Projeto Online: [Dados da Planilha](https://joaoricardobr.github.io/extratordedadosexcel/)  
 
 ## Créditos
 
 - **SheetJS**: Biblioteca para manipulação de planilhas Excel. [Site Oficial](https://sheetjs.com/)
 - **jsPDF**: Biblioteca para geração de PDFs. [Site Oficial](https://parall.ax/products/jspdf)
+- **docxtemplater**: Biblioteca para geração de documentos DOCX. [Site Oficial](https://docxtemplater.com/)
+- **PptxGenJS**: Biblioteca para geração de apresentações PPTX. [Site Oficial](https://gitbrent.github.io/PptxGenJS/)
 
